@@ -1,0 +1,117 @@
+{% load static %}
+{% load bootstrap5 %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>{% block title %}{% endblock title %}</title>
+	<link rel="stylesheet" href="{% static 'chat/styles/style.css' %}">
+	{% bootstrap_css %}
+	{% bootstrap_javascript %}
+	<style>
+		#chat {
+			width: 40%;
+			margin: auto;
+			border: 1px solid black;
+			overflow: scroll;
+			height: 500px;
+			margin-bottom: 2%;
+			border-radius: 10px;
+		}
+		#users {
+			width: 15%;
+			margin: 0;
+			border: 1px solid black;
+			overflow: scroll;
+			height: 500px;		
+			position: absolute;
+			border-radius: 10px;
+		}
+		#submit-field {
+			width: 40%;
+			margin: auto;
+		}
+	</style>
+</head>
+<body>
+	<div class="container-fluid">
+		{% include 'chat/nav.html' %}
+		{% block content %}{% endblock content %}		
+	</div>
+	{% block scripts %}
+		<script
+			src="https://code.jquery.com/jquery-3.6.0.min.js"
+			integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+			crossorigin="anonymous">
+		</script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				{% for chat in chats %}
+					$('#{{ chat }}').click(function(event) {
+						window.location.pathname = event.target.innerText + '/';
+					})
+				{% endfor %}
+			})
+		</script>
+
+		<script>
+			var roomName = {{ room_name_json }};
+			var chatSocket = new WebSocket(
+				'ws://' + window.location.host + '/ws/chat/' + roomName + '/');
+		
+			chatSocket.onmessage = function(e) {
+				var data = JSON.parse(e.data);
+				var message = data['message'];
+				var users = data['users'];
+				let hello = data['hello'];
+
+				if (message)
+				{
+					console.log(message)
+					$(document).ready(function() {
+						$( "#chat-log" ).append("<p></p>", message);
+						$( "#chat-log" ).append("<hr>");
+						$("#chat").scrollTop($("#chat")[0].scrollHeight);
+					})
+				}
+				if (users)
+				{
+					us = JSON.parse(users)
+					console.log(hello)
+					$(document).ready(function() {
+						$( "#user-list" ).empty();
+						for (let i = 0; i < us.length; i++) {
+							$( "#user-list" ).append("<p></p><hr/>", us[i]['user__username']);
+						}
+						$( "#chat-log" ).append("<i>" + hello + "</i>");
+						$( "#chat-log" ).append("<hr>");
+						$("#chat").scrollTop($("#chat")[0].scrollHeight);
+					})
+				}
+			};
+		
+			chatSocket.onclose = function(e) {
+				console.error('Chat socket closed unexpectedly');
+			};
+		
+			document.querySelector('#chat-message-input').focus();
+			document.querySelector('#chat-message-input').onkeyup = function(e) {
+				if (e.keyCode === 13) {  // enter, return
+					document.querySelector('#chat-message-submit').click();
+				}
+			};
+		
+			document.querySelector('#chat-message-submit').onclick = function(e) {
+				var messageInputDom = document.querySelector('#chat-message-input');
+				var message = messageInputDom.value;
+				chatSocket.send(JSON.stringify({
+					'message': message
+				}));
+		
+				messageInputDom.value = '';
+			};
+		</script>
+	{% endblock scripts %}
+</body>
+</html>

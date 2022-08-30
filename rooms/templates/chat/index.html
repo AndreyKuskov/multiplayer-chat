@@ -1,0 +1,21 @@
+{% extends 'chat/base.html' %}
+{% load bootstrap5 %}
+{% load static %}
+
+{% block title %}
+
+{% endblock title %}
+
+{% block content %}
+	{% if not user.is_authenticated %}
+		<form action="" method="post">
+			{% csrf_token %}
+			{% bootstrap_form form %}
+			{% bootstrap_button "Login" button_type="submit" button_class="btn-primary" %}
+		</form>
+	{% else %}
+		<div class="alert alert-primary" role="alert">
+			Выберите комнату для общения!
+		</div>
+	{% endif %}
+{% endblock content %}

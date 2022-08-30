@@ -1,0 +1,29 @@
+{% extends 'chat/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+
+{% block title %}
+
+{% endblock title %}
+
+{% block content %}
+	<h1 style="text-align: center;">Чат: {{ room_name }}</h1>
+	<div id="users" class="border border-1">
+		<h2 style="text-align: center;">Пользователи</h2>
+		<div id="user-list">
+		</div>
+	</div>
+	<div id="chat" class="border border-1">
+		<div id="chat-log">
+			{% for message in messages %}
+				<p>{{ message }}</p>
+				<hr>
+			{% endfor %}
+			
+		</div>
+	</div>
+	<div class="input-group mb-3" id="submit-field">
+		<input type="text" id="chat-message-input" class="form-control" placeholder="Написать сообщение..." aria-label="Написать сообщение..." aria-describedby="button-addon2">
+		<button class="btn btn-outline-secondary" type="button" id="chat-message-submit">Отправить</button>
+	</div>
+{% endblock content %}
